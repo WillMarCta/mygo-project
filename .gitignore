@@ -1,0 +1,12 @@
+# Entornos virtuales
+backend/venv/
+venv/
+
+# Secretos y Configuración
+.env
+backend/.env
+
+# Basura de Python y Sistema
+__pycache__/
+*.py[cod]
+.DS_Store
