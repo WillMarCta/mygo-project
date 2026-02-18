@@ -1,6 +1,6 @@
 # Mygo Project
 
-Lead prospector and scoring tool built with **Python**, **FastAPI**, and **PostgreSQL**.
+Mini project that connects to the Apollo API to fetch company data built with **Python**, **FastAPI**, and **PostgreSQL**.
 
 
 ## 🛠️ Tech Stack
