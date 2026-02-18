@@ -1,18 +1,13 @@
 import requests
-from backend.services.external_companymodel import ExternalCompany
+from backend.services.external_companymodel import ExternalCompanyModel 
 
 APOLLO_API_KEY = "xzyn8EQODtSDovkwbTuDCw"
-APOLLO_URL = "https://api.apollo.io/api/v1/mixed_people/api_search"
+APOLLO_URL = "https://api.apollo.io/v1/organizations/enrich?api_key=XXX&domain=microsoft.com"
 
-def fetch_company_from_apollo(domain: str) -> ExternalCompany:
+def fetch_company_from_apollo() -> list[ExternalCompanyModel]:
     """fetching company data from Apollo API"""
     payload = {
         "api_key": APOLLO_API_KEY,
-        "q_organization_domains_list": [domain], # Lista requerida por Apollo
-        "person_titles": ["IT Manager", "VP of IT", "IT Director"],
-        "currently_using_any_of_technology_uids": ["sap", "sap_s4_hana", "sap_ewm"],
-        "person_seniorities": ["vp", "director", "manager"],
-        "organization_revenue_min": 500000000, # ICP: $500M+    
         "page": 1,
         "per_page": 1
     }
@@ -22,24 +17,29 @@ def fetch_company_from_apollo(domain: str) -> ExternalCompany:
         "accept": "application/json"
     }
     
-    response = requests.post(APOLLO_URL, json=payload, headers=headers, timeout=10)
-
-    if response.status_code != 200:
-        raise Exception(f"Error Apollo API: {response.text}")
-            
+    try:
+        response = requests.post(APOLLO_URL, json=payload, headers=headers, timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as http_err:
+         raise RuntimeError(f"HTTP error occurred: {http_err.response.status_code}") from http_err
+    except requests.exceptions.RequestException as req_err:
+        raise RuntimeError("No se pudo conectar con el servidor de Apollo") from req_err
+    
     data = response.json()
-    people = data.get("people", []) # El endpoint devuelve 'people'
+    people = data.get("people", [])
     
-    if not people:
-        raise ValueError(f"No prospect found for {domain} matching ICP criteria.")
-    
-    # SOLUCIÓN AL ERROR: Definir org_data extrayendo la info del primer lead
-    org_data = people[0].get("organization", {}) #
-    
-    return ExternalCompany(
-        name=org_data.get("name"),
-        domain=domain,
-        industry=None, # Search solo devuelve 'has_industry' (bool)
-        revenue=None,  # Search solo devuelve 'has_revenue' (bool)
-        technologies=[] 
-    )
+    companies: list[ExternalCompanyModel] = []
+
+    for person in people:
+        org = person.get("organization", {})
+        companies.append(
+            ExternalCompanyModel(
+                name=org.get("name"),
+                domain=org.get("website_url"),
+                industry=org.get("industry"),
+                revenue=org.get("annual_revenue"),
+                technologies=org.get("technologies", [])
+            )
+        )
+
+    return companies

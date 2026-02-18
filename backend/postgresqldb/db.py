@@ -1,16 +1,26 @@
+import os
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
+from backend.config import settings
 
+load_dotenv()
 
-DATABASE_URL ="postgresql+psycopg://postgres:123456@localhost:5432/mygo_db"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_engine(settings.DATABASE_URL)
 
+SessionLocal = sessionmaker(
+    autocommit=False, 
+    autoflush=False, 
+    bind=engine
+)
 
+Base = declarative_base()
 
-try: 
-    with engine.connect() as conn: 
-        print("Conexión exitosa a PostgreSQL") 
-except Exception as e:
-    print("Error:", e)
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

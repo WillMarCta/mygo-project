@@ -2,9 +2,10 @@ from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from sqlalchemy import text
 from backend.postgresqldb.db import engine
+from backend.routers import leads_sync_router
+from backend.routers.leads_sync_router import router 
 
 
-# Esto se ejecuta UNA VEZ al iniciar el servidor
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     """testing database connection on startup"""
@@ -20,5 +21,6 @@ async def lifespan(_: FastAPI):
 
     print("🛑 Limpiando recursos antes de apagar...")
 
-
 app = FastAPI(lifespan=lifespan)
+
+app.include_router(leads_sync_router.router, tags=["Ingestion"])

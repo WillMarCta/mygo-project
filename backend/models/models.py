@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, BigInteger, DateTime, ARRAY
 from sqlalchemy.sql import func
-from sqlalchemy.orm import declarative_base
+from backend.postgresqldb.db import Base
 
-Base = declarative_base()
 
+ 
 class Company(Base):
     __tablename__ = "companies"
 
