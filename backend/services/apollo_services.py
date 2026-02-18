@@ -1,8 +1,8 @@
 import requests
 from backend.services.external_companymodel import ExternalCompanyModel 
 
-APOLLO_API_KEY = "xzyn8EQODtSDovkwbTuDCw"
-APOLLO_URL = "https://api.apollo.io/v1/organizations/enrich?api_key=XXX&domain=microsoft.com"
+APOLLO_API_KEY = "**"
+APOLLO_URL = "**"
 
 def fetch_company_from_apollo() -> list[ExternalCompanyModel]:
     """fetching company data from Apollo API"""
